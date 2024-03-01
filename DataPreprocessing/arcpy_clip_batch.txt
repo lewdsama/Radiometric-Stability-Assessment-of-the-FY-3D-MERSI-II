@@ -1,0 +1,25 @@
+import arcpy
+from arcpy.sa import *
+import os
+
+input_folders = ["SolZ", "SenZ", "B3", "B4", "SolA", "SenA"]
+output_folder_suffix = "_RightTargetArea"
+
+shp_file_name = "F:/基于FY的MOA/DomeC辐射精度验证/sample_area/RightSample_Polygon.shp"
+
+for folder in input_folders:
+    tif_file_path = "J:/DomeC_data/2019-2022_1015-1119/{}/".format(folder)
+    clip_file_path = "J:/DomeC_data/2019-2022_1015-1119/{}{}/".format(folder, output_folder_suffix)
+    
+    # Create output folder if it doesn't exist
+    if not os.path.exists(clip_file_path):
+        os.makedirs(clip_file_path)
+    
+    arcpy.env.workspace = tif_file_path
+    tif_file_name = arcpy.ListRasters("*", "tif")
+
+    for tif_file in tif_file_name:
+        key_name = tif_file.split(".tif")[0] + "{}.tif".format(output_folder_suffix)
+        clip_file_name = os.path.join(clip_file_path, key_name)
+        clip_file = ExtractByMask(tif_file, shp_file_name)
+        clip_file.save(clip_file_name)
